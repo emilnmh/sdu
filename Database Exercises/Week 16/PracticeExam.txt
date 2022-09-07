@@ -1,0 +1,65 @@
+1.A) Create relational schemata from the above E/R diagram using the E/R-style translation. 
+Indicate the key attributes by underlining them. Explain the need for each
+of the schemata you create. If you join several entities into one relation, explain
+why
+
+Customer("name")
+Ticket("Event", "ID", price)
+Festivalticket("Event", "ID", Day)
+Concertticket("Event", "ID", Seat No.)
+
+
+1.B) Create relational schemata from the above E/R diagram using the object-oriented
+translation. Indicate the key attributes by underlining them. Explain the need for
+each of the schemata you create. If you join several entities into one relation, explain
+why.
+
+Customer("name")
+Ticket("Event", "ID", price)
+Festivalticket("Event", "ID", Price, Day)
+Concertticket("Event", "ID", Price, Seat No.)
+
+
+1.C) Create relational schemata from the above E/R diagram using the null translation.
+Indicate the key attributes by underlining them. Explain the need for each of the
+schemata you create. If you join several entities into one relation, explain why.
+
+Customer("name")
+Ticket("Event", "ID", price, Festivalticket, Concertticket)
+
+
+
+
+2.A) Write an SQL SELECT query without subqueries, which lists the alcohol percentages
+served from the red tap.
+
+SELECT DISTINCT Alcohol FROM beers, taps WHERE beers.BeerID = taps.BeerID AND Tap = "red"
+
+
+2.B) Write an SQL SELECT query with subqueries, which lists the names of all beers
+that are not served from any taps.
+
+SELECT Name FROM beers WHERE NOT EXISTS IN (SELECT DISTINCT BeerID FROM taps WHERE beers.BeerID = taps.BeerID)
+
+
+2.C) Write an SQL SELECT query, which lists all taps together with the number of
+different beers that they are connected to. There should be exactly one row for each
+tap in the result.
+
+SELECT tap, COUNT(DISTINCT BeerID) FROM taps GROUP BY tap
+
+
+
+
+3.A) For each of the following expressions, give the resulting relation as a table similar
+to the ones for R1 and R2 above.
+1. σC>D(R2)
+[A, C, D]
+[1, 3, 2]
+
+2. ΠB,C(R1)
+
+
+3. R1 ./ R2
+[A, B, C, D]
+[1, 2, 3, 2]

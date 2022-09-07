@@ -1,0 +1,8 @@
+Har vi lavet det rigtigt? (Tree).
+
+
+5. Scan inputfilen igen. Undervejs find for hver byte dets kodeord (ved opslag i tabellen over kodeord),
+og skriv dette kodeords bits til outputfilen.
+Hvorfor gemme vi det ikke bare "koderne" i et map til bogstaverne, så vi ikke behøver at gå igennem filen igen.
+
+

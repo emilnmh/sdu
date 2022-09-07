@@ -1,0 +1,50 @@
+Exercise 13.7.1)
+A patient record consists of the following fixed-length fields: 
+the patient’s date of birth, social-security number, and patient ID, each 10 bytes long. It also has the
+following variable-length fields: name, address, and patient history. If pointers within a record
+require 4 bytes, and the record length is a 4-byte integer, how many bytes, exclusive of the
+space needed for the variable length fields, are needed for the record? You may assume that
+no alignment of fields is required.
+
+Data:
+
+10 bytes each
+--------------
+Date of birth
+Social-security number
+Patient ID
+--------------
+
+4 bytes
+--------------
+Pointers
+Record length
+--------------
+
+How many bytes exclusive of the space need for the variable length fields are need for thr record?
+You may assume that no alignment of fields is required.
+
+Result = 
+3 * 10 bytes (Fixed length fields) + 3 * 4 bytes (var pointers) + 4 bytes + 4 bytes (header-info) = 50 bytes 
+
+
+Exercise 13.8.1)
+Relational database systems have always
+preferred to use fixed-length tuples if possible. Give three reasons for this preference.
+
+1. Man kan nemmere søge igennem dem, da man kender offsetet.
+2. Mindre complexitet ved indsættelse, så man skal ikke rykke rundt på elementer ved siden af.
+3. Mindre overhead ved block konstruktion
+
+
+
+Exercise 14.1.1)
+Suppose blocks hold either three records, or ten key-pointer pairs.
+As a function of n, the number of records, how many blocks do we need to hold a data file and:
+(a) A dense index (b) A sparse index?
+
+(a) Alle værdier i indexet.
+f(n) = ceil(n/3) + ceil(n/10)
+
+
+(b) Udvalgte værdier i indexet.

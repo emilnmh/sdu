@@ -1,0 +1,175 @@
+Execise 4.1.1)
+Design a database for a bank, including information about customers
+and their accounts. Information about a customer includes their name, address, phone, and
+Social Security number. Accounts have numbers, types (e.g., savings, checking) and balances.
+Also record the customer(s) who own an account. Draw the E/R diagram for this database. Be
+sure to include arrows where appropriate, to indicate the multiplicity of a relationship.
+
+
+Look at Execise 4.1.1.png
+
+
+Execise 4.2.1)
+In Fig. 4.14 is an E /R diagram for a bank database involving
+customers and accounts. Since customers may have several accounts, and accounts may be
+held jointly by several customers, we associate with each customer an “account set,” and
+accounts are members of one or more account sets. Assuming the meaning of the various
+relationships and attributes are as expected given their names, criticize the design. What design
+rules are violated? Why? What modifications would you suggest?
+
+Remove: Addresses entity set and place it as an attribute of customer.
+Remove: Owner address from AccSets
+Join: Many-many accounts to customers.
+
+
+Execise 4.3.1 a) 
+ For your E/R diagrams of: a) Exercise 4.1.1.
+(i) Select and specify keys, and (ii) Indicate appropriate referential integrity constraints.
+
+(i) keys
+Customer: Social Security number
+Account: Numbers or Account ID
+
+(ii) Referential Integrity constraints (Foreign Key)
+(Social Security Number, Number)
+
+
+
+Execise 4.4.1)
+One way to represent students and the grades they get in courses is
+to use entity sets corresponding to students, to courses, and to “enrollments.” Enrollment
+entities form a “connecting” entity set between students and courses and can be used to
+represent not only the fact that a student is taking a certain course, but the grade of the student
+in the course. Draw an E /R diagram for this situation, indicating weak entity sets and the keys
+for the entity sets. Is the grade part of the key for enrollments?
+
+
+Look at Execise 4.4.1.png
+
+
+Execise 4.4.4 a)
+Draw E /R diagrams for the following situations involving weak
+entity sets. In each case indicate keys for entity sets.
+a) Entity sets Courses and Departments. A course is given by a unique department, but its
+only attribute is its number. Different departments can offer courses with the same number.
+Each department has a unique name.
+
+
+Look at Execise 4.4.4.png
+Edit: Department-Course relation: one-to-many
+
+
+Execise 4.5.1)
+Convert the E/R diagram of Fig. 4.29 to a relational database
+schema.
+
+
+Customers:
+SSNo (key) [int], name [text], addr [text], phone [int]
+
+Flights:
+number (key) [int], day (key) [datetime], aircraft [text]
+
+Bookings:
+CustomerSSNo (key) [int], flightNumber (key) [int], flightDay (key) [datetime], row [int], seat [text]
+
+
+Execise 4.6.1)
+Convert the E /R diagram of Fig. 4.32 to a relational database
+schema, using each of the following approaches:
+
+a) The straight-E/R method.
+    Depts:
+    Name (key) [text], chair [text]
+
+    Course:
+    number (key) [int], deptname (key) [text], room
+
+    Lap course:
+    number (key), deptname (key) [text], allocation [boolean]
+
+b) The object-oriented method.
+    Depts:
+    Name (key) [text], chair [text]
+
+    Course:
+    number (key) [int], deptname (key) [text], room [text]
+
+    Lap course:
+    number (key) [int], deptname (key) [text], allocation [boolean], room [text]
+
+c) The nulls method.
+    Depts:
+    Name (key) [text], chair [text]
+
+    Lap course:
+    number (key) [int], deptname (key) [text], allocation [boolean] NULL, room [text]
+
+
+Execise 7.1.1)
+Our running example movie database of Section 2.2.8 has keys
+defined for all its relations.
+Declare the following referential integrity constraints for the movie database as in Exercise
+7.1.1.
+a) The producer of a movie must be someone mentioned in MovieExec. Modifications to
+MovieExec that violate this constraint are rejected.
+
+FOREIGN KEY (producerC#) 
+    REFERENCES MovieExec (name)
+
+reject is default.
+
+
+b) Repeat (a), but violations result in the producerC# in Movie being set to NULL.
+
+FOREIGN KEY (producerC#) 
+    REFERENCES MovieExec (name)
+    ON DELETE SET NULL
+    ON UPDATE SET NULL
+
+
+c) Repeat (a), but violations result in the deletion or update of the offending Movie tuple.
+
+FOREIGN KEY (producerC#) 
+    REFERENCES MovieExec (name)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+
+
+d) A movie that appears in Starsln must also appear in Movie. Handle violations by rejecting
+the modification.
+
+FOREIGN KEY (movieTitle)
+    REFERENCES Movies (title)
+
+
+e) A star appearing in Starsln must also appear in MovieStar. Handle violations by deleting
+violating tuples.
+
+FOREIGN KEY (starName)
+    REFERENCES MovieStar (name)
+
+
+
+Execise 7.2.1) 
+Write the following constraints for attributes of the relation
+Movies(titile, year, length, genre, studioName, producerC#)
+
+a) The year cannot be before 1915.
+CHECK (year >= 1915)
+
+b) The length cannot be less than 60 nor more than 250.
+CHECK (length >= 60 AND length < 250)
+
+c) The studio name can only be Disney, Fox, MGM, or Paramount.
+CHECK (studioName = "Disney" OR studioName = "Fox" OR studioName = "MGM" OR studioName = "Paramount")
+
+
+Execise 7.5.1)
+Write the triggers analogous to Fig. 7.6 for the insertion and deletion
+events on MovieExec.
+
+insertion:
+
+
+deletion:

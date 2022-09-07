@@ -1,0 +1,2 @@
+1. Få information fra spillerne. Sæt player op.
+2. Start spillet.

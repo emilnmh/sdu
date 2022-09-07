@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Lexend&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="styles.css" />
+		<title>D-Chat | Log in</title>
+	</head>
+	<body>
+		<div class="content-container">
+			<div class="login-page">
+				<form
+					class="login-container container"
+					id="login_form"
+					action="/auth/login"
+					method="post"
+				>
+					<div class="login-header-container">
+						<img
+							src="./res/logo.svg"
+							alt="logo"
+							class="login-logo"
+						/>
+						<p class="login-logo-text">D-CHAT</p>
+					</div>
+					<div class="login-input-container">
+						<label for="input-username" class="login-input-label"
+							>Username</label
+						>
+						<input
+							autocomplete="off"
+							type="text"
+							name="username"
+							id="input-username"
+							class="login-input"
+						/>
+					</div>
+					<div class="login-input-container">
+						<label for="input-username" class="login-input-label"
+							>Password</label
+						>
+						<input
+							type="password"
+							name="password"
+							id="input-password"
+							class="login-input"
+						/>
+					</div>
+					<input
+						type="submit"
+						class="primary-button"
+						value="Log in"
+					/>
+					<a href="/" class="secondary-button">Sign up</a>
+				</form>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,13 @@
+Forklar problemet.
+Skriv hvad der er vigtigt.
+Forklar hvad de forskellige variabler en.
+Dokumenter de forskellige metoder.
+Kode behøver ikke være i rapporten, kun hvis man ikke kan forklare det på anden måde.
+Hele koden skal dog ligge i bilagget.
+Ikke noget krav på længden, men ikke for langt ~10 sider.
+Inkluder eksempler.
+Debugging metoden, forklar hvordan.
+Rapporten skal afleveres som PDF, og programmet i class.
+Skriv hvem den ansvarlige er fra gruppen.
+Vurder funktionaltitet og stil
+Husk kommentar i koden.

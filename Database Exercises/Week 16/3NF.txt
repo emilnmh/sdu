@@ -1,0 +1,5 @@
+3NF
+En givet relation, og FDs (Funktional dependency)
+Se om de er i minimal basis (Et sæt af FDs hvor man ikke kan fjerne nogle attributer uden at miste information), hvis de ikke er det fjerne man de relationer der er overflødige.
+Laver alle FDs til en relation.
+Så ser man om nogle af relationerne en superkey. 

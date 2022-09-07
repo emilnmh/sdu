@@ -1,0 +1,34 @@
+Forsiden
+	Projektnavnet
+	Gruppenummer
+	Navne + hvem den ansvarlige er
+
+Introduktion
+	Problembeskrivelse
+
+Problemløsningen
+	Hvordan løser vi problemet
+
+Klasser
+	Beskriv klassen
+	uml class diagram
+	Klassens metode. Funktion, precondition, postcondition
+	Forklar de forskellige metoder.
+
+Funktionalitet
+	Vis eksempler fra koden
+	Forklar hvordan eksemplet fungere
+	Forklar hvorfor vi netop har valgt at skrive koden således
+
+Debugging
+	Metoder brugt til at debugge koden
+		Unit testing (Side 380)
+		Kapitel 5
+	Kan ikke være helt sikker på at koden virker 100%, kan være edge cases.
+
+Anden information
+	Ændring i dokumentation/Opdatering 
+	Hvad skulle have været gjort anderledes
+
+Bilag
+	Koden

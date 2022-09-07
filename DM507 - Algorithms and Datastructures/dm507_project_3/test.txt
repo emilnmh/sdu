@@ -1,0 +1,2 @@
+Det her er en test fil, som vi bruge til at læse alle tegnene som bytes (8 bits).DEtasd asd a fgsdg sdfg sfdasd asd
+Filen skal så kombrimeres til at den ikke fylder så meget med Huffman's algoritme. PODFK Æ mf i<un9udnf9nkjda´sd903m as dasdfk

@@ -1,0 +1,121 @@
+Exercise 6.6.1)
+a) Given a speed and amount of RAM (as arguments of the function), look up the PC’s with that
+speed and RAM, printing the model number and price of each.
+
+CREATE FUNCTION modelAndPriceFromSpeedAndRam (
+    IN s INTEGER, 
+    IN r INTEGER
+) RETURNS TABLE(PC_model INTEGER, PC_price INTEGER) AS $$
+SELECT model, price
+FROM pc
+WHERE speed = s AND ram = r;
+$$ LANGUAGE plpgsql;
+
+b) Given a model number, delete the tuple for that model from both PC and Product.
+
+CREATE FUNCTION deletePC (
+    IN m INTEGER
+) RETURNS VOID AS $$
+BEGIN
+    BEGIN TRANSACTION;
+
+    DELETE FROM PC
+    WHERE model = m;
+
+    DELETE FROM Product
+    WHERE model = m;
+
+    COMMIT;
+END
+$$ LANGUAGE plpgsql;
+
+c) Given a model number, decrease the price of that model PC by $100.
+
+CREATE FUNCTION reducePriceBy100 (
+    m INTEGER
+) RETURNS VOID AS $$
+
+UPDATE PC
+SET price = (price - 100)
+WHERE model = m;
+
+$$ LANGUAGE plpgsql;
+
+d) Given a maker, model number, processor speed, RAM size, hard-disk size, and price, check
+that there is no product with that model. If there is such a model, print an error message for the
+user. If no such model existed in the database, enter the information about that model into the
+PC and Product tables.
+
+
+
+
+Exercise 8.1.1)
+a) A view RichExec giving the name, address, certificate number and net worth of all
+executives with a net worth of at least $10,000,000.
+
+CREATE VIEW RichExec AS
+SELECT name, address, cert#, netWorth
+FROM MovieExec
+WHERE netWorth >= 10000000;
+
+b) A view StudioPres giving the name, address, and certificate number of all executives who
+are studio presidents.
+
+CREATE VIEW StudioPres AS
+SELECT name, MovieExec.address, cert#
+FROM Studio, MovieExec
+WHERE presC# = MoveiExec.name;
+
+c) A view ExecutiveStar giving the name, address, gender, birth date, certificate number, and
+net worth of all individuals who are both executives and stars.
+
+CREATE VIEW ExecutiveStar
+SELECT MovieStar.name, MovieStar.address, gender, birthdate, cert#, netWorth
+FROM MovieStar, MovieExec
+WHERE MovieStar.name = MovieExec.name;
+
+
+
+
+Exercise 8.1.2)
+Write each of the queries below, using one or more of the
+views from Exercise 8.1.1 and no base tables.
+
+a) Find the names of females who are both stars and executives.
+
+SELECT name 
+FROM ExecutiveStar
+WHERE Gender = female;
+
+b) Find the names of those executives who are both studio presidents and worth at least
+$10,000,000.
+
+SELECT name
+FROM StudioPres, RichExec
+WHERE StudioPres.name = RichExec.name;
+
+
+
+
+Exercise 8.2.1
+Which of the views of Exercise 8.1.1 are updatable?
+RichExec
+
+
+
+
+Exercise 8.3.1
+Declare indexes on the following attributes or combination of attributes:
+a) studioName.
+CREATE INDEX studioName ON 
+Studio (name);
+
+b) address of MovieExec.
+CREATE INDEX addressOfMovieExec ON
+MovieExec (address);
+
+c) genre and length.
+CREATE INDEX genreAndLength ON
+Movies (length, genre);
+
+

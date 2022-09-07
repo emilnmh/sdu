@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Lexend&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="/styles.css" />
+		<title>D-CHAT</title>
+		<script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<script>
+			var group_chats = [];
+			var filtered_group_chats = [];
+			var group_order = "ASC";
+			var selected_group_chat = null;
+			var message_event_source = null; // Event source for group chats.
+			var group_filter = "";
+			var chat_members = [];
+			var user_filter = "";
+
+			window.onload = () => {
+				// Change to EventSource.
+				const group_event_source = new EventSource(`/groups`);
+				group_event_source.onmessage = (event) => {
+					const new_group = JSON.parse(event.data);
+					group_chats.push(new_group);
+					add_group_chat(new_group, group_filter);
+				};
+			};
+
+			/**
+			 * Setting a new message event source
+			 */
+			function set_message_event_source(name) {
+				if (message_event_source != null) message_event_source.close();
+				console.log("Adde msg event source");
+				message_event_source = new EventSource(`/messages/${name}`);
+				message_event_source.onmessage = (event) => {
+					const response = JSON.parse(event.data);
+					add_message({
+						username: response.author,
+						time: response.time,
+						message: response.text,
+					});
+				};
+			}
+
+			/**
+			 * Adds a new message to the chat.
+			 */
+			function add_message(message) {
+				var chatbox = document.getElementById("messages-container");
+				if (chatbox != null) {
+					chatbox.innerHTML += `<div class="main-chat-message-container">
+                    <div class="chat-message-avatar-container">
+                        <img src="https://i.pravatar.cc/64?u=${
+							message.username
+						}" alt="user icon" class="chat-message-avatar" >
+                    </div>
+                    <div>
+                        <div class="chat-message-detail-container">
+                            <span class="chat-message-username">${message.username.toUpperCase()}</span>
+                            <span class="chat-message-time">${get_string_time(
+								new Date(message.time)
+							)}</span>
+                        </div>
+                        <p class="chat-message">${message.message}</p>
+                    </div>
+                </div>`;
+				}
+			}
+
+			function get_string_time(date) {
+				const minutes =
+					date.getMinutes() < 10
+						? "0" + date.getMinutes()
+						: date.getMinutes();
+				return (
+					date.getHours() +
+					":" +
+					minutes +
+					" " +
+					date.getDate() +
+					"-" +
+					(date.getMonth() + 1) +
+					"-" +
+					date.getFullYear()
+				);
+			}
+
+			function reorder_group_chats() {
+				group_order = group_order === "ASC" ? "DESC" : "ASC";
+				var icon = document.getElementById("group-chat-order");
+				icon.src =
+					group_order === "ASC"
+						? "/res/ascending.svg"
+						: "/res/decending.svg";
+				update_group_chats();
+			}
+
+			function update_group_chats() {
+				var container = document.getElementById(
+					"group-chats-container"
+				);
+				container.innerHTML = "";
+				if (group_order === "ASC") {
+					for (var i = 0; i < group_chats.length; i++) {
+						add_group_chat(group_chats[i]);
+					}
+				} else {
+					for (var i = group_chats.length - 1; i >= 0; i--) {
+						add_group_chat(group_chats[i]);
+					}
+				}
+			}
+
+			/**
+			 * Searching through all the group chats with the given name from the input.
+			 */
+			function search_group_chat() {
+				var input = document.getElementById("search-chat-input");
+				group_filter = input.value;
+				update_group_chats();
+			}
+
+			/**
+			 * Adds a new group chat to the sidebar.
+			 */
+			function add_group_chat(group_chat, filter = group_filter) {
+				if (
+					group_chat != null &&
+					group_chat.name.toUpperCase().includes(filter.toUpperCase())
+				) {
+					var container = document.getElementById(
+						"group-chats-container"
+					);
+					if (container != null)
+						container.innerHTML += `<div class="sidebar-group-container" onclick="select_group_chat('${
+							group_chat.name
+						}')">
+                        <span class="sidebar-group-name">${group_chat.name.toUpperCase()}</span>
+                    </div>`;
+				}
+			}
+
+			function show_leave_chat() {
+				var body = document.getElementById("body");
+				if (body != null) {
+					body.innerHTML += `<div class="popup-background" id="popup">
+                    <div class="leave-chat-container">
+                        <div class="leave-chat-header">
+                            <div class="user-search-input-container">
+                                <h1>LEAVE CHAT</h1>
+                            </div>
+                            <button class="popup-close-button" onclick="hide_popup()">
+                                <img src="/res/close.svg" alt="search" class="user-close-button-icon" draggable='false'/>
+                            </button>
+                        </div>
+                        <div class="leave-chat-body">
+                            <h1>Are you sure, you want to leave?</h1>
+                            <form action="/group/leave/${selected_group_chat.name}" method="post"> 
+                                <input class="secondary-button" type="submit" value="Leave chat" >
+                            </form>
+                        </div>
+                    </div>
+                </div>`;
+				}
+			}
+
+			/**
+			 * Selects the group chat with the given id.
+			 */
+			function select_group_chat(group_name) {
+				// Find the group chat.
+				const chat = group_chats.find(
+					(chat) => chat.name === group_name
+				);
+				if (chat !== null) {
+					chat_members = [];
+					$.ajax({
+						dataType: "json",
+						url: `/group`,
+						method: "post",
+						data: {
+							name: group_name,
+						},
+					})
+						.done((data) => {
+							$.ajax({
+								dataType: "json",
+								url: `/group/${chat.name}`,
+								method: "get",
+							})
+								.done((data) => {
+									chat_members = data.members;
+								})
+								.error((error) => {
+									console.log("Something went wrong...");
+								});
+						})
+						.error((error) => {
+							console.log("Something went wrong.");
+						});
+
+					selected_group_chat = chat;
+					var parent = document.getElementById("chat-box-parent");
+					parent.innerHTML = `<div class="main-chat-box" id="chat-box-display">
+                    <div class="main-chat-box-header">
+                        <h1 class="main-chat-box-title">${selected_group_chat.name.toUpperCase()}</h1>
+                        <div class="main-chat-box-header-buttons">
+                            <button class="main-chat-header-button" onclick="show_leave_chat()">
+                                <img src="/res/leave.svg" alt="leave chat" class="main-chat-close-chat-icon" draggable='false'>
+                            </button>
+                            <button class="main-chat-header-button main-chat-search-user-button" onclick="show_search_users()">
+                                <img src="/res/search.svg" alt="search user" class="main-chat-search-user-icon" draggable='false'>
+                            </button>
+                            <button class="main-chat-header-button" onclick="close_chat()">
+                                <img src="/res/close.svg" alt="close chat" class="main-chat-close-chat-icon" draggable='false'>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="main-chat-box-messages-container">
+                        <div class="main-chat-box-messages" id="messages-container">
+                        </div>
+                    </div>
+                    <div class="main-chat-box-write-container">
+                        <textarea class="chat-box-text-area" id="text-area" placeholder="Enter message"></textarea>
+                        <button class="send-chat-button" onclick="send_message()">SEND</button>
+                    </div>
+                </div>`;
+					// Find all the messages and insert them.
+					set_message_event_source(selected_group_chat.name);
+					window.history.pushState(
+						"",
+						"",
+						`/chat/${selected_group_chat.name}`
+					);
+				}
+			}
+
+			/**
+			 * Sends a new message.
+			 */
+			function send_message() {
+				var text_input = document.getElementById("text-area");
+				const message = text_input.value;
+				text_input.value = "";
+				if (message.length > 0) {
+					$.ajax({
+						dataType: "json",
+						url: `/message/${selected_group_chat.name}`,
+						method: "post",
+						data: {
+							msg: message,
+						},
+					});
+				}
+			}
+
+			//Event listener for enter button
+			document.addEventListener(
+				"keyup",
+				(event) => {
+					event.preventDefault(); // cancels default actionss
+					var name = event.key;
+					if (
+						name == "Enter" &&
+						document.getElementById("text-area").value.length > 0
+					) {
+						$(".send-chat-button").click();
+					}
+				},
+				false
+			);
+
+			/**
+			 * Toggles the search user popup.
+			 */
+			function show_search_users() {
+				var body = document.getElementById("body");
+				var popup = document.getElementById("popup");
+				if (popup == null) {
+					body.innerHTML += `<div class="popup-background" id="popup">
+                    <div class="user-search-container">
+                        <div class="user-search-header">
+                            <div class="user-search-input-container">
+                                <input type="text" class="user-search-input" id="search-user-field" placeholder="Search user">
+                                <button class="user-search-button" onclick="search_users()">
+                                    <img src="/res/search.svg" alt="search" class="user-search-button-icon" draggable='false' />
+                                </button>
+                            </div>
+                            <button class="popup-close-button" onclick="hide_popup()">
+                                <img src="/res/close.svg" alt="search" class="user-close-button-icon" draggable='false'/>
+                            </button>
+                        </div>
+                        <div class="user-search-body">
+                            <div class="user-search-found-users" id="search-users-container">
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+					const container = document.getElementById(
+						"search-users-container"
+					);
+					for (var i = 0; i < chat_members.length; i++) {
+						add_search_user(chat_members[i]);
+					}
+				}
+			}
+
+			/**
+			 * Creates the popup to create a new chat.
+			 */
+			function show_create_chat() {
+				var body = document.getElementById("body");
+				var popup = document.getElementById("popup");
+				if (popup == null) {
+					body.innerHTML += `<div class="popup-background" id="popup">
+                    <div class="create-chat-container">
+                        <div class="create-chat-header">
+                            <h1>
+                                CREATE CHAT
+                            </h1>
+                            <button class="popup-close-button" onclick="hide_popup()">
+                                <img src="/res/close.svg" alt="search" class="user-close-button-icon" draggable='false' />
+                            </button>
+                        </div>
+                        <div class="create-chat-body">
+                            <p class="create-chat-text">WHAT'S YOUR CHAT'S NAME?</p>
+                            <input type="text" class="create-chat-name-input" id="create-chat-input">
+                            <button class="primary-button" onclick="create_chat()">CREATE</button>
+                        </div>
+                    </div>
+                </div>`;
+				}
+			}
+
+			/**
+			 * Creates a new chat with the user as the owner.
+			 */
+			function create_chat() {
+				var input = document.getElementById("create-chat-input");
+				if (input.value != "") {
+					$.ajax({
+						dataType: "json",
+						url: "/group",
+						method: "post",
+						data: {
+							name: input.value,
+						},
+					})
+						.done((data) => {
+							hide_popup();
+						})
+						.error((error) => {
+							console.log("Something went wrong...");
+						});
+				}
+			}
+
+			/**
+			 * Removes the popup window for user search.
+			 */
+			function hide_popup() {
+				var popup = document.getElementById("popup");
+				if (popup != null) popup.remove();
+			}
+
+			/**
+			 * Searching for users inside the groupchat with the name from the input.
+			 */
+			function search_users() {
+				var inputField = document.getElementById("search-user-field");
+				user_filter = inputField.value;
+				var usersContainer = document.getElementById(
+					"search-users-container"
+				);
+				if (usersContainer != null) {
+					usersContainer.innerHTML = "";
+					chat_members.forEach((user) => {
+						add_search_user(user);
+					});
+				}
+			}
+
+			/**
+			 * Adds a new user to the group chat search for user popup.
+			 */
+			function add_search_user(user, filter = user_filter) {
+				var usersContainer = document.getElementById(
+					"search-users-container"
+				);
+				if (usersContainer != null) {
+					if (
+						user.name.toUpperCase().includes(filter.toUpperCase())
+					) {
+						usersContainer.innerHTML += `<div class='search-user-user-container'>
+                        <img src='https://i.pravatar.cc/64?u=${
+							user.name
+						}' alt="avatar" class="search-user-avatar" >
+                        <p class='search-user-username'>${user.name.toUpperCase()}</p>
+                    </div>`;
+					}
+				}
+			}
+
+			/**
+			 * Closes the chat window.
+			 */
+			function close_chat() {
+				var chatbox = document.getElementById("chat-box-parent");
+				if (chatbox != null) {
+					var child = chatbox.lastElementChild;
+					while (child) {
+						chatbox.removeChild(child);
+						child = chatbox.lastElementChild;
+					}
+					chatbox.innerHTML += `<div class="no-chat-container">
+                    <p class="no-chat-select-text">Choose a group chat</p>
+                </div>`;
+					window.history.pushState("", "", "/chat");
+				}
+			}
+		</script>
+	</head>
+	<body id="body">
+		<div class="content-container">
+			<div class="main-page">
+				<div class="main-container container">
+					<div class="main-container-sidebar">
+						<div class="sidebar-groups-container">
+							<div class="sidebar-header-container">
+								<img
+									src="/res/logo.svg"
+									class="sidebar-logo"
+									draggable="false"
+								/>
+								<h1 class="sidebar-title">D-CHAT</h1>
+							</div>
+							<div class="sidebar-group-create-group-container">
+								<button
+									class="sidebar-group-create-button"
+									onclick="show_create_chat()"
+								>
+									<span
+										class="sidebar-group-create-button-text"
+										>CREATE NEW CHAT</span
+									>
+									<img
+										src="/res/add.svg"
+										alt="create group chat"
+										class="sidebar-group-create-button-icon"
+										draggable="false"
+									/>
+								</button>
+							</div>
+							<div class="sidebar-search-chat-parent-container">
+								<div class="sidebar-search-chat-container">
+									<div class="sidebar-search-left">
+										<button
+											class="sidebar-left-button"
+											onclick="reorder_group_chats()"
+										>
+											<img
+												src="/res/ascending.svg"
+												class="sidebar-search-sort-icon"
+												id="group-chat-order"
+												draggable="false"
+											/>
+										</button>
+									</div>
+									<div class="sidebar-search-center">
+										<input
+											type="text"
+											name="search-chat-input"
+											id="search-chat-input"
+											class="search-chat-input"
+											placeholder="Chat name"
+										/>
+									</div>
+									<div class="sidebar-search-right">
+										<button
+											class="sidebar-right-button"
+											onclick="search_group_chat()"
+										>
+											<img
+												src="/res/search.svg"
+												class="sidebar-search-search-icon"
+												draggable="false"
+											/>
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="sidebar-search-group-scroll-container">
+								<div
+									class="sidebar-search-group-chat-container"
+									id="group-chats-container"
+								></div>
+							</div>
+							<form
+								class="sidebar-footer-container"
+								method="GET"
+								action="/auth/logout"
+							>
+								<input
+									type="submit"
+									class="secondary-button"
+									value="Log out"
+								/>
+							</form>
+						</div>
+					</div>
+					<div class="main-chat-box-container" id="chat-box-parent">
+						<div class="no-chat-container">
+							<p class="no-chat-select-text">
+								Choose a group chat
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

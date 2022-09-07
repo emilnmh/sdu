@@ -1,0 +1,67 @@
+Execise 3.3.1 e)
+BCNF
+
+R(A, B, C, D, E)
+FD: 
+    AB -> C
+    DE -> C 
+    B  -> D
+
+Algoritme fra bogen.
+
+Er det alle FD's? Lav closure?
+1) 
+    {AB}^+ = {A, B, C, D}
+    {DE}^+ = {D, E, C}
+    {B}^+ = {B, D}
+
+2)
+    AB -> C
+    AB -> D
+    DE -> C
+    B  -> D
+
+3) Keys fra relationen.
+Mindst alle attributerne som ikke er på højre side i 2)
+    {A, B, E}^+ = {A, B}^+ U {E}^+ = {A, B, C, D, E}
+
+4) Overholder FD's BCNF? Venstreside er en superkey?
+    AB -> C != {A, B, C}: Nej
+    AB -> D != {A, B, C}: Nej
+    DE -> C != {A, B, C}: Nej
+    B  -> D != {A, B, C}: Nej
+
+5) Opdel relation i to.
+    R(A, B, C, D, E)
+    [AB -> C]
+
+    {AB}^+ = R1(A, B, C, D)
+    AB + R\{AB}^+ = R2(A, B, E)
+
+6) Overholder de nye relationer BCNF?
+    Er venstreside en superkey?
+    R1: 
+        AB -> C: Overholder
+        AB -> D: Overholder
+        B  -> D: Overholder ikke.
+    R2: Overholder.
+
+7) Opdel R1:
+    {B}^+ = {B, D}
+    R3(B, D)
+
+    B + R\{B}^+
+    R4(B, A, C)
+
+8) Overholde de nye relationer BCNF?
+    Er venstre side en superkey?
+    R3: 
+        (Kun to attributer overholder altid) Overholder
+    R4:
+        AB->C: Overholder
+
+9)
+    R(A, B, C, D, E)
+        -> R2(A, B, E)
+        -> R3(B, D)
+        -> R4(A, B, C)

@@ -1,0 +1,10 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - Play",
+            "request": "launch",
+            "mainClass": "Play"
+        }
+    ]
+}

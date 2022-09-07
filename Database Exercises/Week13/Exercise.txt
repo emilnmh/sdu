@@ -1,0 +1,225 @@
+Exercise 9.4.1) Write PSM procedures
+a) Given the name of a movie studio, produce the net worth of its president.
+
+CREATE FUNCTION movieStudiosPresidentNetworth (
+    studioName VARCHAR(255)
+) RETURNS INT
+DECLARE
+    PresNetWorth INT;
+BEGIN
+    SELECT netWorth
+    INTO PresNetWorth
+    FROM Studio, MovieExec
+    WHERE presC# = Cert# AND studio.name = studioName;
+    
+    RETURN PresNetWorth;
+END; $$ LANGUAGE plpgsql; 
+
+b) Given a name and address. return 1 if the person is a movie star but not an executive, 
+2 if the person is an executive but not a star, 3 if both and 4 if neither.
+
+CREATE FUNCTION personStatus (
+    personName VARCHAR(255),
+    personAddress VARCHAR(255)
+) RETURNS INT AS $$
+DECLARE
+    status INT
+    movieStar BOOLEAN
+    movieExec BOOLEAN
+
+BEGIN
+
+    SET movieStar = False;
+    SET movieExec = False;
+
+    IF EXISTS(
+        SELECT *
+        FROM MovieStar
+        WHERE MovieStar.name = personName AND MovieStar.address = personAddress; 
+    )
+        SET movieStar = True
+
+    IF EXISTS(
+        SELECT *
+        FROM MovieStar
+        WHERE MovieStar.name = personName AND MovieStar.address = personAddress; 
+    )
+        SET movieExec = True
+
+
+    IF movieExec AND movieStar THEN 
+        SET status = 1
+    ELSEIF movieStar THEN  
+        SET status = 2
+    ELSEIF movieExec THEN  
+        SET status = 3
+    ELSE 
+        SET status = 4
+    END IF;
+
+    RETURN status;
+END; $$ LANGUAGE plpgsql;
+
+
+
+Exercise 9.6.1) Write code in Java using JDBC
+a) Ask the user for a price and find the PC whose price is closest to the desired price
+Print the maker model number and speed of the PC.
+
+import java.sql.*;
+public class Week13 {
+    private Properties props = new Properties();
+    private String url = "jdbc:postgresql://localhost:5432/";
+
+    private static Connection connect() {
+        props.setProperties("user", "postgres");
+        props.setProperties("password", "1234");
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection(url, props);
+            if (conn != null) {
+                System.out.println("connected to database);
+                conn.setAutoCommit(false);
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to establish connection");
+            e.printStackTrace();
+        }
+
+        return conn;
+    }
+
+    public void pcWithClosestPrice(int price) {
+
+        Connection conn = connect();
+        try (PreparedStatement stmt = conn.preparedStatement("SELECT price, maker, model, speed FROM PC, Product WHERE PC.model = Product.model;")){
+            conn.setReadOnly(true);
+            ResultSet result = stmt.executeQuery();
+
+        } catch (SQLException e) {
+            System.err.println("Failed to do the thing");
+            e.printStackTrace();
+        }
+        
+        // Process result.
+        int closestPriceIndex = 0;
+        int closestPrice = MAX;
+        while (result.next()) {
+            if (Math.abs(result.getInt("price") - price) < closestPrice) {
+                closestPriceIndex = result.getRow();
+            }
+        }
+
+        result.absolute(closestPriceIndex);
+
+        System.out.println("model: " + result.getString("model") + " price: " + result.getInt("price") + " speed: " + result.getInt("speed") + " maker: " + result.getString("maker"));
+    } 
+}
+
+
+b) Ask the user for minimum values of the speed, RAM, hard-disk size, and screen size
+that they will accept. Find all the laptops that satisfy these requirements. Print their
+specifications (all attributes of Laptop) and their manufacturer.
+
+
+import java.sql.*;
+public class Week13 {
+    private Properties props = new Properties();
+    private String url = "jdbc:postgresql://localhost:5432/";
+
+    private static Connection connect() {
+        props.setProperties("user", "postgres");
+        props.setProperties("password", "1234");
+        Connection conn = null;
+
+        try {
+            conn = DriverManager.getConnection(url, props);
+            if (conn != null) {
+                System.out.println("connected to database);
+                conn.setAutoCommit(false);
+            }
+        } catch (SQLException e) {
+            System.err.println("Failed to establish connection");
+            e.printStackTrace();
+        }
+
+        return conn;
+    }
+
+    public void pcs(double speed, int ram, int hhd, double screensize)) {
+
+        Connection conn = connect();
+        try (PreparedStatement stmt = conn.preparedStatement("SELECT laptop.*, maker FROM Laptop, product WHERE Laptop.model = Product.model AND speed >= ? AND ram >= ? AND hhd >= ? and screen >= ?;")){
+            conn.setReadOnly(true);
+
+            stmt.setDouble(1, speed);
+            stmt.setInt(2, ram);
+            stmt.setInt(3, hhd);
+            stmt.setDouble(4, screensize);
+
+            ResultSet result = stmt.executeQuery();
+
+            while (result.next()) {
+                System.out.println(
+                    "model = " + result.getInt("model");
+                );
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Failed to do the thing");
+            e.printStackTrace();
+        }
+        
+        // Process result.
+        int closestPriceIndex = 0;
+        int closestPrice = MAX;
+        while (result.next()) {
+            if (Math.abs(result.getInt("price") - price) < closestPrice) {
+                closestPriceIndex = result.getRow();
+            }
+        }
+
+        result.absolute(closestPriceIndex);
+
+        System.out.println("model: " + result.getString("model") + " price: " + result.getInt("price") + " speed: " + result.getInt("speed") + " maker: " + result.getString("maker"));
+    } 
+}
+
+
+Exercise 9.4.1) Write PSM proceducres or functions to perfom the following tasks.
+e) Given an address, find the name of the unique star with that address if there is exactly one,
+and return NULL if there is none or more than one.
+
+CREATE FUNCTION starFromAddress (
+    starAddress VARCHAR(255)
+) RETURNS VARCHAR(255) 
+
+IF EXISTS(
+    SELECT * FROM MovieStar WHERE MovieStar.address = starAddress;
+) THEN RETURN SELECT name FROM MovieStar WHERE MovieStar.address = starAddress;
+ELSE RETURN NULL
+END IF; 
+
+f) Given the name of a star, delete them from MovieStar and delete all their movies from
+Starsln and Movies.
+
+CREATE PRECEDURE star(
+    IN starName VARCHAR(255)
+) 
+DECLARE moveCursor CURSOR FOR
+    SELECT movieTitle FROM StarsIn WHERE StarsIn.starName = starName;
+
+BEGIN
+DELETE FROM MovieStar
+WHERE MovieStar.name = starName;
+
+movieLoop: LOOP
+    FETCH FROM MovieCursor INTO newMovie;
+    DELETE FROM Movies WHERE name = newMovie;
+END LOOP; 
+
+DELETE FROM StarsIn
+WHERE StarsIn.starName = starName;
+
+END;
